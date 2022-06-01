@@ -9,9 +9,6 @@ import listEndpoints from "express-list-endpoints";
 // import exercisesRoute from "./routes/exercises"
 // import programsRoute from "./routes/programs"
 
-// import Exercise from "./schemas/Exercise";
-// import Program from "./schemas/Program";
-// import User from "./schemas/User";
 
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/project-final";
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -28,14 +25,81 @@ app.use(cors());
 app.use(express.json());
 
 
+const ExerciseSchema = new mongoose.Schema({
+  exercise: {
+    type: String, 
+    required: true,
+    minlength: [5, "The name must contain at least 5 letters"],
+    maxlength: [20, "The name can contain maximum 20 letters"],
+    trim: true
+  },
+  metrics: {
+    type: String,
+    // required: true,
+    enum: ['set', 'reps', 'weights'],
+  }
+})
+
+const Exercise = mongoose.model('Exercise', ExerciseSchema)
+
+app.post("/exercise/:programId", async (req, res) => {
+  const { programId } = req.params
+  const { exercise } = req.body
+  
+  try {
+    const newExercise = await Exercise.find({ exercise }).save();
+    const updatedProgram = await Program.findByIdAndUpdate(programId, {
+      $push: {
+        exercise: newExercise
+      }
+    })
+    res.status(201).json({
+      response: updatedProgram,
+      success: true
+    })
+  } catch (error) {
+    res.status(400).json({
+      response: error, 
+      success: false
+    })
+  }
+})
+
+// app.get("/exercises", async (req, res) => {
+//   try {
+//     const exercises = await Exercise.find({})
+//     res.status(200).json({
+//       response: exercises,
+//       success: true 
+//     }) 
+//   } catch(error) {
+//     res.status(400).json({
+//       response: 'Could not get exercise',
+//       success: false
+//     })
+//   }
+// })
+
 const ProgramSchema = new mongoose.Schema({
   programType: {
     type: String,
     enum: ['weights', 'cardio'],
     required: true,
-    lowercase: true
+    lowercase: true,
+    trim: true
   },
-  // exercise: [ExerciseSchema],
+  programName: {
+    type: String,
+    required: true,
+    minlength: [5, "The name must contain at least 5 letters"],
+    maxlength: [20, "The name can contain maximum 20 letters"],
+    trim: true,
+    unique: true
+  },
+  exercise: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Exercise"
+  }],
   createdAt: {
     type: Date,
     default: () => new Date()
@@ -58,10 +122,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: () => crypto.randomBytes(128).toString("hex")
   },
-  program: {
+  program: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Program"
-  }
+  }]
 })
 
 
@@ -135,13 +199,19 @@ app.post("/login", async (req, res) => {
 
 
 
-app.post("/programs", async (req, res) => {
+app.post("/program/:userId", async (req, res) => {
+  const { userId } = req.params
   const { programType } = req.body
 
   try {
-    const newProgram = await Program({programType}).save()
+    const newProgram = await Program({ programType }).save()
+    const updatedUser = await User.findByIdAndUpdate(userId, {
+      $push: { 
+        program: newProgram 
+      }
+    })
     res.status(201).json({
-      response: newProgram,
+      response: updatedUser,
       success: true
     })
   } catch (error) {
@@ -152,22 +222,22 @@ app.post("/programs", async (req, res) => {
   }
 })
 
-app.post("/user", async (req, res) => {
-  const { program } = req.body
-  try {
-    const queriedProgram = await Program.findById(program)
-    const newProgram = await new User({program: queriedProgram}).save();
-    res.status(201).json({
-      response: newProgram,
-      success: true
-    })
-  } catch(error) {
-    res.status(400).json({
-      response: error, 
-      success: false
-    })
-  }
-})
+// app.post("/user/:userId", async (req, res) => {
+  // const { program } = req.body
+  // try {
+  //   const queriedProgram = await Program.findById(program)
+  //   const newProgram = await new User({program: queriedProgram}).save();
+  //   res.status(201).json({
+  //     response: newProgram,
+  //     success: true
+  //   })
+  // } catch(error) {
+  //   res.status(400).json({
+  //     response: error, 
+  //     success: false
+  //   })
+  // }
+// })
 
 const authenticateUser = async (req, res, next) => {
   const accessToken = req.header("Authorization")
@@ -194,9 +264,9 @@ app.get("/mypage", authenticateUser)
 app.get("/mypage/:userId", async (req, res) => {
   const { userId } = req.params
   try {
-    const myPage = await User.findById(userId).populate("program")
+    const userPrograms = await User.findById(userId).populate("program")
     res.status(200).json({
-      response: myPage,
+      response: userPrograms,
       success: true 
     }) 
   } catch(error) {
@@ -205,6 +275,21 @@ app.get("/mypage/:userId", async (req, res) => {
       success: false
     })
   }
+
+  // const { userId } = req.params
+
+  // try {
+  //   const myPage = await User.findById(userId).populate()
+  //   res.status(200).json({
+  //     response: myPage,
+  //     success: true
+  //   })
+  // } catch (error) {
+  //   res.status(400).json({
+  //     response: error,
+  //     success: false
+  //   })
+  // }
 })
 
 // app.get("/programs", authenticateUser)
@@ -227,50 +312,7 @@ app.get("/mypage/:userId", async (req, res) => {
 // app.use("/exercises", exercisesRoute)
 // app.use("/programs", programsRoute)
 
-// const ExerciseSchema = new mongoose.Schema({
-//   exercise: {
-//     type: String, 
-//     required: true,
-//   },
-  // metrics: {
-  //   type: String,
-  //   required: true,
-  //     enum: ['set', 'reps', 'weights]
-  // }
-//})
 
-// const Exercise = mongoose.model('Exercise', ExerciseSchema)
-
-// app.post("/exercises", async (req, res) => {
-//   const {exercise} = req.body
-//   try {
-//     const newExercise = await new Exercise.find({exercise}).save();
-//     res.status(200).json({
-//       response: newExercise,
-//       success: true
-//     })
-//   } catch(error) {
-//     res.status(400).json({
-//       response: error, 
-//       success: false
-//     })
-//   }
-// })
-
-// app.get("/exercises", async (req, res) => {
-//   try {
-//     const exercises = await Exercise.find({})
-//     res.status(200).json({
-//       response: exercises,
-//       success: true 
-//     }) 
-//   } catch(error) {
-//     res.status(400).json({
-//       response: 'Could not get exercise',
-//       success: false
-//     })
-//   }
-// })
 
 // Start the server
 app.listen(port, () => {
