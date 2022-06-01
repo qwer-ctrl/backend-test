@@ -35,19 +35,20 @@ const ExerciseSchema = new mongoose.Schema({
   },
   metrics: {
     type: String,
-    // required: true,
+    required: true,
     enum: ['set', 'reps', 'weights'],
   }
 })
 
 const Exercise = mongoose.model('Exercise', ExerciseSchema)
 
+
 app.post("/exercise/:programId", async (req, res) => {
   const { programId } = req.params
   const { exercise } = req.body
   
   try {
-    const newExercise = await Exercise.find({ exercise }).save();
+    const newExercise = await new Exercise({ exercise }).save();
     const updatedProgram = await Program.findByIdAndUpdate(programId, {
       $push: {
         exercise: newExercise
@@ -204,7 +205,7 @@ app.post("/program/:userId", async (req, res) => {
   const { programType } = req.body
 
   try {
-    const newProgram = await Program({ programType }).save()
+    const newProgram = await new Program({ programType }).save()
     const updatedUser = await User.findByIdAndUpdate(userId, {
       $push: { 
         program: newProgram 
@@ -275,38 +276,25 @@ app.get("/mypage/:userId", async (req, res) => {
       success: false
     })
   }
-
-  // const { userId } = req.params
-
-  // try {
-  //   const myPage = await User.findById(userId).populate()
-  //   res.status(200).json({
-  //     response: myPage,
-  //     success: true
-  //   })
-  // } catch (error) {
-  //   res.status(400).json({
-  //     response: error,
-  //     success: false
-  //   })
-  // }
 })
 
-// app.get("/programs", authenticateUser)
-// app.get("/programs", async (req, res) => {
-//   try {
-//     const programs = await Program.find({})
-//     res.status(200).json({
-//       response: programs,
-//       success: true 
-//     }) 
-//   } catch(error) {
-//     res.status(400).json({
-//       response: 'Could not get programs',
-//       success: false
-//     })
-//   }
-// })
+
+app.get("/myprogram/:programId", async (req, res) => {
+  const { programId } = req.params
+
+  try {
+    const userExercises = await Program.findById(programId).populate("exercise")
+    res.status(200).json({
+      response: userExercises,
+      success: true
+    })
+  } catch (error) {
+    res.status(400).json({
+      response: error,
+      success: false
+    })
+  }
+})
 
 // app.use("./routes/auth", authRoute)
 // app.use("/exercises", exercisesRoute)
