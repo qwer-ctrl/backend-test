@@ -1,13 +1,17 @@
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-// import crypto from "crypto"
-// import bcrypt from "bcrypt"
-// import listEndpoints from "express-list-endpoints";
+import crypto from "crypto"
+import bcrypt from "bcrypt"
+import listEndpoints from "express-list-endpoints";
 
 // import authRoute from "./routes/auth"
-import exercisesRoute from "./routes/exercises"
-import programsRoute from "./routes/programs"
+// import exercisesRoute from "./routes/exercises"
+// import programsRoute from "./routes/programs"
+
+// import Exercise from "./schemas/Exercise";
+// import Program from "./schemas/Program";
+// import User from "./schemas/User";
 
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/project-final";
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -24,161 +28,184 @@ app.use(cors());
 app.use(express.json());
 
 
-// const ProgramSchema = new mongoose.Schema({
-//   programType: {
-//     type: String,
-//     enum: ['Weights', 'Cardio'],
-//     required: true,
-//   },
-//   // exercise: [ExerciseSchema],
-//   createdAt: {
-//     type: Date,
-//     default: () => new Date()
-//   }
-// })
+const ProgramSchema = new mongoose.Schema({
+  programType: {
+    type: String,
+    enum: ['weights', 'cardio'],
+    required: true,
+    lowercase: true
+  },
+  // exercise: [ExerciseSchema],
+  createdAt: {
+    type: Date,
+    default: () => new Date()
+  }
+})
 
-// const UserSchema = new mongoose.Schema({
-//   username: {
-//     type: String,
-//     required: true,
-//     unique: true,
-//   },
-//   password: {
-//     type: String,
-//     required: true,
-//   },
-//   accessToken: {
-//     type: String,
-//     default: () => crypto.randomBytes(128).toString("hex")
-//   },
-//   program: [ProgramSchema]
-// })
+const Program = mongoose.model('Program', ProgramSchema)
 
-
-
-// const Program = mongoose.model('Program', ProgramSchema)
-// const User = mongoose.model('User', UserSchema)
-
-// // Start defining your routes here
-// app.get("/", (req, res) => {
-//   res.send(listEndpoints(app));
-// });
+const UserSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+  accessToken: {
+    type: String,
+    default: () => crypto.randomBytes(128).toString("hex")
+  },
+  program: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Program"
+  }
+})
 
 
-// app.post("/register", async (req, res) => {
-//   const { username, password } = req.body
-//   try {
-//     const salt = bcrypt.genSaltSync()
+const User = mongoose.model('User', UserSchema)
 
-//     if (password.length < 8) {
-//       res.status(400).json({
-//         response: "Password must be at least 8 characters long",
-//         success: false
-//       })
-//     } else {
-//       const newUser = await new User({
-//         username: username,
-//         password: bcrypt.hashSync(password, salt)
-//       }).save()
-//       res.status(201).json({
-//         response: {
-//           username: newUser.username,
-//           accessToken: newUser.accessToken,
-//           userId: newUser._id
-//         },
-//         success: true
-//       })
-//     }
-//   } catch (error) {
-//     res.status(400).json({
-//       response: error,
-//       success: false
-//     })
-//   }
-// })
+// Start defining your routes here
+app.get("/", (req, res) => {
+  res.send(listEndpoints(app));
+});
 
 
-// app.post("/login", async (req, res) => {
-//   const { username, password } = req.body
+app.post("/register", async (req, res) => {
+  const { username, password } = req.body
+  try {
+    const salt = bcrypt.genSaltSync()
 
-//   try {
-//     const user = await User.findOne({ username })
+    if (password.length < 8) {
+      res.status(400).json({
+        response: "Password must be at least 8 characters long",
+        success: false
+      })
+    } else {
+      const newUser = await new User({
+        username: username,
+        password: bcrypt.hashSync(password, salt)
+      }).save()
+      res.status(201).json({
+        response: {
+          username: newUser.username,
+          accessToken: newUser.accessToken,
+          userId: newUser._id
+        },
+        success: true
+      })
+    }
+  } catch (error) {
+    res.status(400).json({
+      response: error,
+      success: false
+    })
+  }
+})
 
-//     if (user && bcrypt.compareSync(password, user.password)) {
-//       res.status(200).json({
-//         success: true,
-//         username: user.username,
-//         accessToken: user.accessToken,
-//         userId: user._id
-//       })
-//     } else {
-//       res.status(400).json({
-//         response: "Sorry, username and password don't match",
-//         success: false
-//       })
-//     }
-//   } catch (error) {
-//     res.status(400).json({
-//       response: error,
-//       success: false
-//     })
-//   }
-// })
+
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body
+
+  try {
+    const user = await User.findOne({ username })
+
+    if (user && bcrypt.compareSync(password, user.password)) {
+      res.status(200).json({
+        success: true,
+        username: user.username,
+        accessToken: user.accessToken,
+        userId: user._id
+      })
+    } else {
+      res.status(400).json({
+        response: "Sorry, username and password don't match",
+        success: false
+      })
+    }
+  } catch (error) {
+    res.status(400).json({
+      response: error,
+      success: false
+    })
+  }
+})
 
 
-// const authenticateUser = async (req, res, next) => {
-//   const accessToken = req.header("Authorization")
 
-//   try {
-//     const user = await User.findOne({ accessToken: accessToken })
-//     if (user) {
-//       next()
-//     } else {
-//       res.status(401).json({
-//         response: "Please log in",
-//         success: false
-//       })
-//     }
-//   } catch (error) {
-//     res.status(400).json({
-//       response: error,
-//       success: false
-//     })
-//   }
-// }
+app.post("/programs", async (req, res) => {
+  const { programType } = req.body
 
-// app.get("/mypage", authenticateUser)
-// app.get("/mypage", async (req, res) => {
-//   const {program} = req.body
-//   try {
-//     const mypage = await User.find({})
-//     res.status(200).json({
-//       response: program,
-//       success: true 
-//     }) 
-//   } catch(error) {
-//     res.status(400).json({
-//       response: 'Could not get programs',
-//       success: false
-//     })
-//   }
-// })
+  try {
+    const newProgram = await Program({programType}).save()
+    res.status(201).json({
+      response: newProgram,
+      success: true
+    })
+  } catch (error) {
+    res.status(400).json({
+      response: error,
+      success: false
+    })
+  }
+})
 
-// app.post("/programs", async (req, res) => {
-//   const {programType} = req.body
-//   try {
-//     const newProgram = await new Program({programType}).save();
-//     res.status(201).json({
-//       response: newProgram,
-//       success: true
-//     })
-//   } catch(error) {
-//     res.status(400).json({
-//       response: error, 
-//       success: false
-//     })
-//   }
-// })
+app.post("/user", async (req, res) => {
+  const { program } = req.body
+  try {
+    const queriedProgram = await Program.findById(program)
+    const newProgram = await new User({program: queriedProgram}).save();
+    res.status(201).json({
+      response: newProgram,
+      success: true
+    })
+  } catch(error) {
+    res.status(400).json({
+      response: error, 
+      success: false
+    })
+  }
+})
+
+const authenticateUser = async (req, res, next) => {
+  const accessToken = req.header("Authorization")
+
+  try {
+    const user = await User.findOne({ accessToken: accessToken })
+    if (user) {
+      next()
+    } else {
+      res.status(401).json({
+        response: "Please log in",
+        success: false
+      })
+    }
+  } catch (error) {
+    res.status(400).json({
+      response: error,
+      success: false
+    })
+  }
+}
+
+app.get("/mypage", authenticateUser)
+app.get("/mypage/:userId", async (req, res) => {
+  const { userId } = req.params
+  try {
+    const myPage = await User.findById(userId).populate("program")
+    res.status(200).json({
+      response: myPage,
+      success: true 
+    }) 
+  } catch(error) {
+    res.status(400).json({
+      response: 'Could not get programs',
+      success: false
+    })
+  }
+})
 
 // app.get("/programs", authenticateUser)
 // app.get("/programs", async (req, res) => {
@@ -197,20 +224,20 @@ app.use(express.json());
 // })
 
 // app.use("./routes/auth", authRoute)
-app.use("./routes/exercises", exercisesRoute)
-app.use("/routes/programs", programsRoute)
+// app.use("/exercises", exercisesRoute)
+// app.use("/programs", programsRoute)
 
 // const ExerciseSchema = new mongoose.Schema({
 //   exercise: {
 //     type: String, 
 //     required: true,
 //   },
-//   // metrics: {
-//   //   type: String,
-//   //   required: true,
-//        enum: ['set', 'reps', 'weights]
-//   // }
-// })
+  // metrics: {
+  //   type: String,
+  //   required: true,
+  //     enum: ['set', 'reps', 'weights]
+  // }
+//})
 
 // const Exercise = mongoose.model('Exercise', ExerciseSchema)
 

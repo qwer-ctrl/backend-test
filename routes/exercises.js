@@ -1,4 +1,5 @@
 import Exercise from "../schemas/Exercise"
+import express from "express"
 
 const router = express.Router()
 
