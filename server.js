@@ -69,6 +69,7 @@ app.post("/exercise/:programId", async (req, res) => {
   }
 })
 
+
 app.get("/exercise/:exerciseId", async (req, res) => {
   const { exerciseId } = req.params
   
@@ -115,6 +116,47 @@ const ProgramSchema = new mongoose.Schema({
 
 const Program = mongoose.model('Program', ProgramSchema)
 
+app.post("/program/:userId", async (req, res) => {
+  const { userId } = req.params
+  const { programType, programName } = req.body
+
+  try {
+    const newProgram = await new Program({ programType, programName }).save()
+    const updatedUser = await User.findByIdAndUpdate(userId, {
+      $push: { 
+        program: newProgram 
+      }
+    })
+    res.status(201).json({
+      response: updatedUser,
+      success: true
+    })
+  } catch (error) {
+    res.status(400).json({
+      response: error,
+      success: false
+    })
+  }
+})
+
+
+app.get("/myprogram/:programId", async (req, res) => {
+  const { programId } = req.params
+
+  try {
+    const userExercises = await Program.findById(programId).populate("exercise")
+    res.status(200).json({
+      response: userExercises,
+      success: true
+    })
+  } catch (error) {
+    res.status(400).json({
+      response: error,
+      success: false
+    })
+  }
+})
+
 
 const UserSchema = new mongoose.Schema({
   username: {
@@ -142,6 +184,7 @@ const User = mongoose.model('User', UserSchema)
 app.get("/", (req, res) => {
   res.send(listEndpoints(app));
 });
+
 
 app.post("/register", async (req, res) => {
   const { username, password } = req.body
@@ -175,6 +218,7 @@ app.post("/register", async (req, res) => {
   }
 })
 
+
 app.post("/login", async (req, res) => {
   const { username, password } = req.body
 
@@ -202,45 +246,6 @@ app.post("/login", async (req, res) => {
   }
 })
 
-app.post("/program/:userId", async (req, res) => {
-  const { userId } = req.params
-  const { programType, programName } = req.body
-
-  try {
-    const newProgram = await new Program({ programType, programName }).save()
-    const updatedUser = await User.findByIdAndUpdate(userId, {
-      $push: { 
-        program: newProgram 
-      }
-    })
-    res.status(201).json({
-      response: updatedUser,
-      success: true
-    })
-  } catch (error) {
-    res.status(400).json({
-      response: error,
-      success: false
-    })
-  }
-})
-
-// app.post("/user/:userId", async (req, res) => {
-  // const { program } = req.body
-  // try {
-  //   const queriedProgram = await Program.findById(program)
-  //   const newProgram = await new User({program: queriedProgram}).save();
-  //   res.status(201).json({
-  //     response: newProgram,
-  //     success: true
-  //   })
-  // } catch(error) {
-  //   res.status(400).json({
-  //     response: error, 
-  //     success: false
-  //   })
-  // }
-// })
 
 const authenticateUser = async (req, res, next) => {
   const accessToken = req.header("Authorization")
@@ -263,6 +268,7 @@ const authenticateUser = async (req, res, next) => {
   }
 }
 
+
 app.get("/mypage", authenticateUser)
 app.get("/mypage/:userId", async (req, res) => {
   const { userId } = req.params
@@ -280,22 +286,7 @@ app.get("/mypage/:userId", async (req, res) => {
   }
 })
 
-app.get("/myprogram/:programId", async (req, res) => {
-  const { programId } = req.params
 
-  try {
-    const userExercises = await Program.findById(programId).populate("exercise")
-    res.status(200).json({
-      response: userExercises,
-      success: true
-    })
-  } catch (error) {
-    res.status(400).json({
-      response: error,
-      success: false
-    })
-  }
-})
 
 // app.use("./routes/auth", authRoute)
 // app.use("/exercises", exercisesRoute)
@@ -307,3 +298,20 @@ app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
 
+
+// app.post("/user/:userId", async (req, res) => {
+  // const { program } = req.body
+  // try {
+  //   const queriedProgram = await Program.findById(program)
+  //   const newProgram = await new User({program: queriedProgram}).save();
+  //   res.status(201).json({
+  //     response: newProgram,
+  //     success: true
+  //   })
+  // } catch(error) {
+  //   res.status(400).json({
+  //     response: error, 
+  //     success: false
+  //   })
+  // }
+// })
