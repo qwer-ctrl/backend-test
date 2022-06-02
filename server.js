@@ -33,22 +33,25 @@ const ExerciseSchema = new mongoose.Schema({
     maxlength: [20, "The name can contain maximum 20 letters"],
     trim: true
   },
-  metrics: {
-    type: String,
-    required: true,
-    enum: ['set', 'reps', 'weights'],
+  // metrics: {
+  //   type: String,
+  //   set: Boolean,
+  //   reps: Boolean,
+  //   weights: Boolean, 
+  // }
+  set: {
+    type: Boolean
   }
 })
 
 const Exercise = mongoose.model('Exercise', ExerciseSchema)
 
-
 app.post("/exercise/:programId", async (req, res) => {
   const { programId } = req.params
-  const { exercise } = req.body
+  const { exercise, set } = req.body
   
   try {
-    const newExercise = await new Exercise({ exercise }).save();
+    const newExercise = await new Exercise({ exercise, set }).save();
     const updatedProgram = await Program.findByIdAndUpdate(programId, {
       $push: {
         exercise: newExercise
@@ -66,20 +69,23 @@ app.post("/exercise/:programId", async (req, res) => {
   }
 })
 
-// app.get("/exercises", async (req, res) => {
-//   try {
-//     const exercises = await Exercise.find({})
-//     res.status(200).json({
-//       response: exercises,
-//       success: true 
-//     }) 
-//   } catch(error) {
-//     res.status(400).json({
-//       response: 'Could not get exercise',
-//       success: false
-//     })
-//   }
-// })
+app.get("/exercise/:exerciseId", async (req, res) => {
+  const { exerciseId } = req.params
+  
+  try {
+    const exercise = await Exercise.findById(exerciseId)
+    res.status(200).json({
+      response: exercise,
+      success: true 
+    }) 
+  } catch(error) {
+    res.status(400).json({
+      response: 'Could not get exercise',
+      success: false
+    })
+  }
+})
+
 
 const ProgramSchema = new mongoose.Schema({
   programType: {
@@ -109,6 +115,7 @@ const ProgramSchema = new mongoose.Schema({
 
 const Program = mongoose.model('Program', ProgramSchema)
 
+
 const UserSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -129,14 +136,12 @@ const UserSchema = new mongoose.Schema({
   }]
 })
 
-
 const User = mongoose.model('User', UserSchema)
 
-// Start defining your routes here
+
 app.get("/", (req, res) => {
   res.send(listEndpoints(app));
 });
-
 
 app.post("/register", async (req, res) => {
   const { username, password } = req.body
@@ -170,7 +175,6 @@ app.post("/register", async (req, res) => {
   }
 })
 
-
 app.post("/login", async (req, res) => {
   const { username, password } = req.body
 
@@ -198,14 +202,12 @@ app.post("/login", async (req, res) => {
   }
 })
 
-
-
 app.post("/program/:userId", async (req, res) => {
   const { userId } = req.params
-  const { programType } = req.body
+  const { programType, programName } = req.body
 
   try {
-    const newProgram = await new Program({ programType }).save()
+    const newProgram = await new Program({ programType, programName }).save()
     const updatedUser = await User.findByIdAndUpdate(userId, {
       $push: { 
         program: newProgram 
@@ -278,7 +280,6 @@ app.get("/mypage/:userId", async (req, res) => {
   }
 })
 
-
 app.get("/myprogram/:programId", async (req, res) => {
   const { programId } = req.params
 
@@ -299,7 +300,6 @@ app.get("/myprogram/:programId", async (req, res) => {
 // app.use("./routes/auth", authRoute)
 // app.use("/exercises", exercisesRoute)
 // app.use("/programs", programsRoute)
-
 
 
 // Start the server
