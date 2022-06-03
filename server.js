@@ -33,14 +33,19 @@ const ExerciseSchema = new mongoose.Schema({
     maxlength: [20, "The name can contain maximum 20 letters"],
     trim: true
   },
-  // metrics: {
-  //   type: String,
-  //   set: Boolean,
-  //   reps: Boolean,
-  //   weights: Boolean, 
-  // }
-  set: {
+  sets: {
     type: Boolean
+  },
+  reps: {
+    type: Boolean
+  },
+  weights: {
+    type: Boolean
+  },
+  comments: {
+    type: String,
+    maxlength: [140, "The maximum amount of characters is 140"],
+    trim: true
   }
 })
 
