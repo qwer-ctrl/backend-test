@@ -46,6 +46,10 @@ const ExerciseSchema = new mongoose.Schema({
     type: String,
     maxlength: [140, "The maximum amount of characters is 140"],
     trim: true
+  },
+  createdAt: {
+    type: Date,
+    default: () => new Date()
   }
 })
 
