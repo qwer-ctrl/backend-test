@@ -84,6 +84,7 @@ app.get("/exercise/:exerciseId", async (req, res) => {
   
   try {
     const exercise = await Exercise.findById(exerciseId)
+    .limit(15)
     res.status(200).json({
       response: exercise,
       success: true 
@@ -93,6 +94,21 @@ app.get("/exercise/:exerciseId", async (req, res) => {
       response: 'Could not get exercise',
       success: false
     })
+  }
+})
+
+app.delete("/deleteexercise/:exerciseId", async (req, res) => {
+  const { exerciseId } = req.params
+
+  try {
+    const deletedExercise = await Exercise.findOneAndDelete(exerciseId)
+    if (deletedExercise) {
+      res.status(201).json({ response: deletedExercise, success: true })
+    } else {
+      res.status(400).json({ response: "Exercise not found", success: false })
+    }
+  } catch (error) {
+    res.status(400).json({ reponse: error, success: false })
   }
 })
 
@@ -148,12 +164,28 @@ app.post("/program/:userId", async (req, res) => {
   }
 })
 
+app.delete("/deleteprogram/:programId", async (req, res) => {
+  const { programId } = req.params
+
+  try {
+    const deletedProgram = await Program.findOneAndDelete(programId)
+    if (deletedProgram) {
+      res.status(201).json({ response: deletedProgram, success: true })
+    } else {
+      res.status(400).json({ response: "Program not found", success: false })
+    }
+  } catch (error) {
+    res.status(400).json({ reponse: error, success: false })
+  }
+})
+
 
 app.get("/myprogram/:programId", async (req, res) => {
   const { programId } = req.params
 
   try {
     const userExercises = await Program.findById(programId).populate("exercise")
+    .limit(10)
     res.status(200).json({
       response: userExercises,
       success: true
