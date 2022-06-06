@@ -97,6 +97,32 @@ app.get("/exercise/:exerciseId", async (req, res) => {
   }
 })
 
+app.post('/updateexercise/:exerciseId', async (req, res) => {
+  
+  const { exerciseId } = req.params
+  const { exercise, sets, reps, weights, comments } = req.body
+
+  try {
+    const updatedExercise = await Exercise.findByIdAndUpdate(exerciseId, { 
+
+        $set: { 
+          exercise,
+          sets,
+          reps,
+          weights,
+          comments
+        }
+    },
+    {
+      new: true
+    })
+    res.status(200).json({ response: updatedExercise, success: true })
+  } catch (error) {
+    res.status(400).json({ response: error, success: false })
+  }
+
+})
+
 app.delete("/deleteexercise/:exerciseId", async (req, res) => {
   const { exerciseId } = req.params
 
@@ -153,7 +179,7 @@ app.post("/program/:userId", async (req, res) => {
       }
     })
     res.status(201).json({
-      response: updatedUser,
+      response: newProgram,
       success: true
     })
   } catch (error) {
@@ -162,6 +188,29 @@ app.post("/program/:userId", async (req, res) => {
       success: false
     })
   }
+})
+
+app.post('/updateprogram/:programId', async (req, res) => {
+  
+  const { programId } = req.params
+  const { programName, programType } = req.body
+
+  try {
+    const updatedProgram = await Program.findByIdAndUpdate(programId, { 
+
+        $set: { 
+          programName: programName,
+          programType: programType
+        }
+    },
+    {
+      new: true
+    })
+    res.status(200).json({ response: updatedProgram, success: true })
+  } catch (error) {
+    res.status(400).json({ response: error, success: false })
+  }
+
 })
 
 app.delete("/deleteprogram/:programId", async (req, res) => {
