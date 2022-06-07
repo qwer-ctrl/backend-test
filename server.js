@@ -57,10 +57,10 @@ const Exercise = mongoose.model('Exercise', ExerciseSchema)
 
 app.post("/exercise/:programId", async (req, res) => {
   const { programId } = req.params
-  const { exercise, set } = req.body
+  const { exercise, sets, reps, weights, comments } = req.body
   
   try {
-    const newExercise = await new Exercise({ exercise, set }).save();
+    const newExercise = await new Exercise({ exercise, sets, reps, weights, comments }).save();
     const updatedProgram = await Program.findByIdAndUpdate(programId, {
       $push: {
         exercise: newExercise
