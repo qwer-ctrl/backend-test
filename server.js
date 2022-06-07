@@ -31,30 +31,20 @@ const ExerciseSchema = new mongoose.Schema({
 		maxlength: [20, 'The name can contain maximum 20 letters'],
 		trim: true,
 	},
-	metrics: [
-		{
-			sets: {
-				type: Boolean,
-			},
-		},
-		{
-			reps: {
-				type: Boolean,
-			},
-		},
-		{
-			weights: {
-				type: Boolean,
-			},
-		},
-		{
-			comments: {
-				type: Boolean,
-				maxlength: [140, 'The maximum amount of characters is 140'],
-				trim: true,
-			},
-		},
-	],
+	sets: {
+		type: String,
+	},
+	reps: {
+		type: String,
+	},
+	weights: {
+		type: String,
+	},
+	comments: {
+		type: String,
+		maxlength: [140, 'The maximum amount of characters is 140'],
+		trim: true,
+	},
 	createdAt: {
 		type: Date,
 		default: () => new Date(),
@@ -65,10 +55,10 @@ const Exercise = mongoose.model('Exercise', ExerciseSchema)
 
 app.post('/exercise/:programId', async (req, res) => {
 	const { programId } = req.params
-	const { exercise, metrics } = req.body
+	const { exercise, sets, reps, weights, comments } = req.body
 
 	try {
-		const newExercise = await new Exercise({ exercise, metrics }).save()
+		const newExercise = await new Exercise({ exercise, sets, reps, weights, comments }).save()
 		const updatedProgram = await Program.findByIdAndUpdate(
 			programId,
 			{
@@ -109,7 +99,7 @@ app.get('/exercise/:exerciseId', async (req, res) => {
 
 app.post('/updateexercise/:exerciseId', async (req, res) => {
 	const { exerciseId } = req.params
-	const { exercise, metrics } = req.body
+	const { exercise, sets, reps, weights, comments } = req.body
 
 	try {
 		const updatedExercise = await Exercise.findByIdAndUpdate(
@@ -117,7 +107,10 @@ app.post('/updateexercise/:exerciseId', async (req, res) => {
 			{
 				$set: {
 					exercise,
-					metrics,
+					sets,
+					reps,
+					weights,
+					comments,
 				},
 			},
 			{
