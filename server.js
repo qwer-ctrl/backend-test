@@ -69,7 +69,7 @@ app.post('/exercise/:programId', async (req, res) => {
 			{ new: true }
 		)
 		res.status(201).json({
-			response: updatedProgram,
+			response: newExercise,
 			success: true,
 		})
 	} catch (error) {
