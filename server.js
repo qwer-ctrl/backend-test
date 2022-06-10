@@ -238,7 +238,7 @@ app.delete('/deleteprogram/:programId', async (req, res) => {
 	const { programId } = req.params
 
 	try {
-		const deletedProgram = await Program.findOneAndDelete(programId)
+		const deletedProgram = await Program.findByIdAndDelete(programId)
 		if (deletedProgram) {
 			res.status(201).json({ response: deletedProgram, success: true })
 		} else {
