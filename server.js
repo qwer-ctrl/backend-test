@@ -147,7 +147,7 @@ app.delete('/deleteexercise/:exerciseId', async (req, res) => {
 	const { exerciseId } = req.params
 
 	try {
-		const deletedExercise = await Exercise.findOneAndDelete(exerciseId)
+		const deletedExercise = await Exercise.findByIdAndDelete(exerciseId)
 		if (deletedExercise) {
 			res.status(201).json({ response: deletedExercise, success: true })
 		} else {
