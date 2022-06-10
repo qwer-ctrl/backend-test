@@ -211,7 +211,7 @@ app.post('/program/:userId', async (req, res) => {
 	}
 })
 
-app.post('/updateprogram/:programId', async (req, res) => {
+app.patch('/updateprogram/:programId', async (req, res) => {
 	const { programId } = req.params
 	const { programName, programType } = req.body
 
