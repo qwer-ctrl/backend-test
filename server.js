@@ -114,7 +114,7 @@ app.get('/exercise/:exerciseId', async (req, res) => {
 
 app.post('/updateexercise/:exerciseId', async (req, res) => {
 	const { exerciseId } = req.params
-	const { exercise, sets, reps, weights, comments } = req.body
+	const { exercise, sets, reps, weights, minutes, seconds, length, duration, link, comments } = req.body
 
 	try {
 		const updatedExercise = await Exercise.findByIdAndUpdate(
