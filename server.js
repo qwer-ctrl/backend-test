@@ -112,7 +112,7 @@ app.get('/exercise/:exerciseId', async (req, res) => {
 	}
 })
 
-app.post('/updateexercise/:exerciseId', async (req, res) => {
+app.patch('/updateexercise/:exerciseId', async (req, res) => {
 	const { exerciseId } = req.params
 	const { exercise, sets, reps, weights, minutes, seconds, exerciseLength, duration, exerciseLink, comments } = req.body
 
