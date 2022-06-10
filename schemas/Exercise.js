@@ -7,7 +7,7 @@ const ExerciseSchema = new Schema({
   },
    metrics: {
      type: String,
-     enum: ['set', 'reps', 'weights'],
+     enum: ['set', 'reps', 'weights', 'minutes', 'seconds', 'length', 'duration', 'link'],
      required: true,
    }
 })

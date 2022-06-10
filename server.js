@@ -40,6 +40,21 @@ const ExerciseSchema = new mongoose.Schema({
 	weights: {
 		type: String,
 	},
+	minutes: {
+		type: String,
+	},
+	seconds: {
+		type: String,
+	},
+	length: {
+		type: String,
+	},
+	duration: {
+		type: String,
+	},
+	link: {
+		type: String,
+	},
 	comments: {
 		type: String,
 		maxlength: [140, 'The maximum amount of characters is 140'],
@@ -55,10 +70,10 @@ const Exercise = mongoose.model('Exercise', ExerciseSchema)
 
 app.post('/exercise/:programId', async (req, res) => {
 	const { programId } = req.params
-	const { exercise, sets, reps, weights, comments } = req.body
+	const { exercise, sets, reps, weights, minutes, seconds, length, duration, link, comments } = req.body
 
 	try {
-		const newExercise = await new Exercise({ exercise, sets, reps, weights, comments }).save()
+		const newExercise = await new Exercise({ exercise, sets, reps, weights, minutes, seconds, length, duration, link, comments }).save()
 		const updatedProgram = await Program.findByIdAndUpdate(
 			programId,
 			{
@@ -110,6 +125,11 @@ app.post('/updateexercise/:exerciseId', async (req, res) => {
 					sets,
 					reps,
 					weights,
+					minutes,
+					seconds,
+					length,
+					duration,
+					link,
 					comments,
 				},
 			},
