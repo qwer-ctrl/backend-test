@@ -46,13 +46,13 @@ const ExerciseSchema = new mongoose.Schema({
 	seconds: {
 		type: String,
 	},
-	length: {
+	exerciseLength: {
 		type: String,
 	},
 	duration: {
 		type: String,
 	},
-	link: {
+	exerciseLink: {
 		type: String,
 	},
 	comments: {
@@ -70,10 +70,10 @@ const Exercise = mongoose.model('Exercise', ExerciseSchema)
 
 app.post('/exercise/:programId', async (req, res) => {
 	const { programId } = req.params
-	const { exercise, sets, reps, weights, minutes, seconds, length, duration, link, comments } = req.body
+	const { exercise, sets, reps, weights, minutes, seconds, exerciseLength, duration, exerciseLink, comments } = req.body
 
 	try {
-		const newExercise = await new Exercise({ exercise, sets, reps, weights, minutes, seconds, length, duration, link, comments }).save()
+		const newExercise = await new Exercise({ exercise, sets, reps, weights, minutes, seconds, exerciseLength, duration, exerciseLink, comments }).save()
 		const updatedProgram = await Program.findByIdAndUpdate(
 			programId,
 			{
@@ -114,7 +114,7 @@ app.get('/exercise/:exerciseId', async (req, res) => {
 
 app.post('/updateexercise/:exerciseId', async (req, res) => {
 	const { exerciseId } = req.params
-	const { exercise, sets, reps, weights, minutes, seconds, length, duration, link, comments } = req.body
+	const { exercise, sets, reps, weights, minutes, seconds, exerciseLength, duration, exerciseLink, comments } = req.body
 
 	try {
 		const updatedExercise = await Exercise.findByIdAndUpdate(
@@ -127,9 +127,9 @@ app.post('/updateexercise/:exerciseId', async (req, res) => {
 					weights,
 					minutes,
 					seconds,
-					length,
+					exerciseLength,
 					duration,
-					link,
+					exerciseLink,
 					comments,
 				},
 			},
