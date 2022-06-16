@@ -31,15 +31,14 @@ const ExerciseSchema = new mongoose.Schema({
 		maxlength: [20, 'The name can contain maximum 20 letters'],
 		trim: true,
 	},
-	sets: {
-		type: String,
-	},
-	reps: {
-		type: String,
-	},
-	weights: {
-		type: String,
-	},
+	sets: [{
+		reps: {
+			type: String
+		},
+		weights: {
+			type: String
+		},
+	}],
 	minutes: {
 		type: String,
 	},
