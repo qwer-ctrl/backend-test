@@ -340,6 +340,7 @@ app.post('/login', async (req, res) => {
 				username: user.username,
 				accessToken: user.accessToken,
 				userId: user._id,
+				program: user.program
 			})
 		} else {
 			res.status(400).json({
