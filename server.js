@@ -279,12 +279,15 @@ const UserSchema = new mongoose.Schema({
 		type: String,
 		default: () => crypto.randomBytes(128).toString('hex'),
 	},
-	program: [
-		{
-			type: mongoose.Schema.Types.ObjectId,
-			ref: 'Program',
-		},
-	],
+	program: {
+		type: [
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: 'Program',
+			},
+		],
+		default: []
+	},
 })
 
 const User = mongoose.model('User', UserSchema)
