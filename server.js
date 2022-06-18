@@ -31,14 +31,23 @@ const ExerciseSchema = new mongoose.Schema({
 		maxlength: [20, 'The name can contain maximum 20 letters'],
 		trim: true,
 	},
-	sets: [{
-		reps: {
-			type: String
-		},
-		weights: {
-			type: String
-		},
-	}],
+	// sets: [{
+	// 	reps: {
+	// 		type: String
+	// 	},
+	// 	weights: {
+	// 		type: String
+	// 	},
+	// }],
+	sets: {
+		type: String,
+	},
+	reps: {
+		type: String,
+	},
+	weights: {
+		type: String,
+	},
 	minutes: {
 		type: String,
 	},
@@ -168,10 +177,8 @@ const ProgramSchema = new mongoose.Schema({
 	programName: {
 		type: String,
 		required: true,
-		minlength: [5, 'The name must contain at least 5 letters'],
 		maxlength: [20, 'The name can contain maximum 20 letters'],
 		trim: true,
-		unique: true,
 	},
 	exercise: [
 		{
