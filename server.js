@@ -136,7 +136,7 @@ app.get('/exercise/:exerciseId', async (req, res) => {
 		})
 	} catch (error) {
 		res.status(400).json({
-			response: 'Could not get exercise',
+			response: error,
 			success: false,
 		})
 	}
@@ -192,7 +192,7 @@ app.delete('/deleteexercise/:exerciseId', async (req, res) => {
 		if (deletedExercise) {
 			res.status(201).json({ response: deletedExercise, success: true })
 		} else {
-			res.status(400).json({ response: 'Exercise not found', success: false })
+			res.status(404).json({ response: 'Exercise not found', success: false })
 		}
 	} catch (error) {
 		res.status(400).json({ reponse: error, success: false })
@@ -281,7 +281,7 @@ app.delete('/deleteprogram/:programId', async (req, res) => {
 		if (deletedProgram) {
 			res.status(201).json({ response: deletedProgram, success: true })
 		} else {
-			res.status(400).json({ response: 'Program not found', success: false })
+			res.status(404).json({ response: 'Program not found', success: false })
 		}
 	} catch (error) {
 		res.status(400).json({ reponse: error, success: false })
@@ -380,7 +380,7 @@ app.post('/login', async (req, res) => {
 				program: user.program,
 			})
 		} else {
-			res.status(400).json({
+			res.status(401).json({
 				response: "Sorry, username and password don't match",
 				success: false,
 			})
@@ -390,6 +390,28 @@ app.post('/login', async (req, res) => {
 			response: error,
 			success: false,
 		})
+	}
+})
+
+app.patch('/updateuser/:userId', async (req, res) => {
+	const { userId } = req.params
+	const { username } = req.body
+
+	try {
+		const updatedUser = await User.findByIdAndUpdate(
+			userId,
+			{
+				$set: {
+					username: username,
+				},
+			},
+			{
+				new: true,
+			}
+		)
+		res.status(200).json({ response: updatedUser, success: true })
+	} catch (error) {
+		res.status(400).json({ response: error, success: false })
 	}
 })
 
@@ -425,7 +447,7 @@ app.get('/mypage/:userId', async (req, res) => {
 		})
 	} catch (error) {
 		res.status(400).json({
-			response: 'Could not get programs',
+			response: error,
 			success: false,
 		})
 	}
