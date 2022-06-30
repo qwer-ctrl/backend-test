@@ -5,21 +5,15 @@ import crypto from 'crypto'
 import bcrypt from 'bcrypt'
 import listEndpoints from 'express-list-endpoints'
 
-// import authRoute from "./routes/auth"
-// import exercisesRoute from "./routes/exercises"
-// import programsRoute from "./routes/programs"
 
 const mongoUrl = process.env.MONGO_URL || 'mongodb://localhost/project-final'
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
 mongoose.Promise = Promise
 
-// Defines the port the app will run on. Defaults to 8080, but can be overridden
-// when starting the server. Example command to overwrite PORT env variable value:
-// PORT=9000 npm start
+
 const port = process.env.PORT || 8080
 const app = express()
 
-// Add middlewares to enable cors and json body parsing
 app.use(cors())
 app.use(express.json())
 
@@ -27,18 +21,9 @@ const ExerciseSchema = new mongoose.Schema({
 	exercise: {
 		type: String,
 		required: true,
-		minlength: [5, 'The name must contain at least 5 letters'],
 		maxlength: [20, 'The name can contain maximum 20 letters'],
 		trim: true,
 	},
-	// sets: [{
-	// 	reps: {
-	// 		type: String
-	// 	},
-	// 	weights: {
-	// 		type: String
-	// 	},
-	// }],
 	sets: {
 		type: String,
 	},
@@ -353,6 +338,7 @@ app.post('/register', async (req, res) => {
 					username: newUser.username,
 					accessToken: newUser.accessToken,
 					userId: newUser._id,
+					program: newUser.program
 				},
 				success: true,
 			})
@@ -453,28 +439,8 @@ app.get('/mypage/:userId', async (req, res) => {
 	}
 })
 
-// app.use("./routes/auth", authRoute)
-// app.use("/exercises", exercisesRoute)
-// app.use("/programs", programsRoute)
 
-// Start the server
 app.listen(port, () => {
 	console.log(`Server running on http://localhost:${port}`)
 })
 
-// app.post("/user/:userId", async (req, res) => {
-// const { program } = req.body
-// try {
-//   const queriedProgram = await Program.findById(program)
-//   const newProgram = await new User({program: queriedProgram}).save();
-//   res.status(201).json({
-//     response: newProgram,
-//     success: true
-//   })
-// } catch(error) {
-//   res.status(400).json({
-//     response: error,
-//     success: false
-//   })
-// }
-// })
